@@ -131,24 +131,25 @@ function loadAttractorFromBrain(onProgress, onComplete) {
     attractorState.phase = 'recalling';
     attractorState.progress = 0;
 
-    // PHASE 1: SPONTANEOUS ACTIVATION - Add noise to start recall
+    // PHASE 1: SPONTANEOUS ACTIVATION - Start with weak random pattern
     console.log("PHASE 1: Initiating spontaneous activation...");
-    addSpontaneousNoise(0.3);
+    clearActivations();
+    addSpontaneousNoise(0.2);  // Reduced noise - let network find pattern
     
     setTimeout(() => {
         attractorState.phase = 'converging';
         attractorState.progress = 0.33;
         
-        // PHASE 2: CONVERGENCE - Let network settle into attractor
+        // PHASE 2: CONVERGENCE - Let network settle into attractor (CRITICAL!)
         console.log("PHASE 2: Network converging to attractor...");
-        propagateActivation(10); // More iterations for convergence
+        propagateActivation(15); // MORE iterations for better convergence
         
         setTimeout(() => {
             attractorState.progress = 0.66;
             
             // PHASE 3: STABILIZATION - Final refinement
             console.log("PHASE 3: Stabilizing pattern...");
-            propagateActivation(5);
+            propagateActivation(10); // More stabilization
             
             setTimeout(() => {
                 attractorState.phase = 'reading';
@@ -158,15 +159,23 @@ function loadAttractorFromBrain(onProgress, onComplete) {
                 console.log("PHASE 4: Reading pattern from neurons...");
                 const img = readImageFromBrain();
                 
+                // DEBUG: Check activations
+                let activeCount = 0;
+                brain.neurons.forEach(n => {
+                    if (n.activation > 0.1) activeCount++;
+                });
+                console.log(`Active neurons: ${activeCount} / ${brain.neurons.length}`);
+                console.log("First 10 colors:", img.slice(0, 10));
+                
                 attractorState.isRecalling = false;
                 attractorState.phase = 'idle';
                 
                 if (onComplete) onComplete(img);
             }, 600);
             
-        }, 1000);
+        }, 1200);  // Longer stabilization time
         
-    }, 1000);
+    }, 1200);  // Longer convergence time
 }
 
 // ---------------------------------------------

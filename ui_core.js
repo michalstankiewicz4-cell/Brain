@@ -140,15 +140,16 @@ function initUI() {
 
 function drawBrainOutput(img) {
     brainOutputCtx.fillStyle = "rgb(0,0,0)";
-    brainOutputCtx.fillRect(0, 0, 64, 64);
+    brainOutputCtx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    for (let i = 0; i < 256; i++) {
+    for (let i = 0; i < TOTAL_PIXELS; i++) {
         const col = img[i];
         if (col !== "rgb(0,0,0)") {
-            const x = (i % 16) * 4;
-            const y = Math.floor(i / 16) * 4;
+            const grid = indexToGrid(i);
+            const canvas = gridToCanvas(grid.x, grid.y);
+            
             brainOutputCtx.fillStyle = col;
-            brainOutputCtx.fillRect(x, y, 4, 4);
+            brainOutputCtx.fillRect(canvas.x, canvas.y, PIXEL_SIZE, PIXEL_SIZE);
         }
     }
 }
