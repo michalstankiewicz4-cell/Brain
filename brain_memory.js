@@ -159,16 +159,16 @@ function loadAttractorFromBrain(onProgress, onComplete) {
         attractorState.phase = 'converging';
         attractorState.progress = 0.33;
         
-        // PHASE 2: OPTIONAL REFINEMENT - Light propagation to smooth pattern
-        console.log("PHASE 2: Refining pattern...");
-        propagateActivation(3); // Just a few iterations to smooth
+        // PHASE 2: SKIP PROPAGATION - Pattern is already correct!
+        console.log("PHASE 2: Pattern loaded (skipping propagation to preserve accuracy)...");
+        // NO propagateActivation() - it blurs the pattern!
         
         setTimeout(() => {
             attractorState.progress = 0.66;
             
-            // PHASE 3: STABILIZATION - Final check
-            console.log("PHASE 3: Stabilizing...");
-            propagateActivation(2);
+            // PHASE 3: SKIP STABILIZATION - Not needed
+            console.log("PHASE 3: Pattern ready...");
+            // NO propagateActivation() - keep original pattern!
             
             setTimeout(() => {
                 attractorState.phase = 'reading';
