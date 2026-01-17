@@ -4,16 +4,39 @@ body {
     color: #ddd;
     font-family: Arial, sans-serif;
     display: flex;
+    flex-direction: row;
     height: 100vh;
+    overflow: hidden;
 }
 
-/* Lewa strona – mózg */
+/* PANEL BOCZNY */
+#right-panel {
+    width: 340px;
+    min-width: 20px;
+    max-width: 50vw;
+    background: #0f1624;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
+/* UCHWYT */
+#panel-resizer {
+    width: 6px;
+    cursor: ew-resize;
+    background: #111a2b;
+    border-right: 1px solid #222;
+    flex: 0 0 auto;
+}
+
+/* MÓZG */
 #brain-container {
-    width: 66%;
-    height: 100%;
+    flex: 1 1 auto;
     background: #050814;
-    position: relative;
 }
 
 #brain-canvas {
@@ -21,53 +44,88 @@ body {
     height: 100%;
 }
 
-/* Prawa strona – panel sterowania */
-
-#right-panel {
-    width: 34%;
-    padding: 10px;
-    background: #0f1624;
-    box-sizing: border-box;
-    overflow-y: auto;
+/* SEKCJE */
+.section {
+    border: 1px solid #333;
+    background: #111a2b;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Edytor pikseli */
+.section-header {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    background: #151f33;
+}
 
-#pixel-editor {
-    width: 256px;
-    height: 256px;
+.drag-handle {
+    width: 16px;
+    text-align: center;
+    cursor: grab;
+    user-select: none;
+    color: #666;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.section-header h3 {
+    margin: 0;
+    margin-left: 6px;
+    color: #ffcc66;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.section-content {
+    padding: 8px;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+/* FORMULARZE */
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 6px 0;
+}
+
+.form-row label {
+    width: 150px;
+    flex-shrink: 0;
+}
+
+.form-row input,
+.form-row select {
+    flex: 1;
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Edytor */
+#editor-row {
+    display: flex;
+    gap: 10px;
+}
+
+#pixel-editor,
+#brain-output {
+    width: 64px;
+    height: 64px;
     background: #111;
     image-rendering: pixelated;
     border: 2px solid #333;
 }
 
-/* Przyciski */
-
-#controls {
-    margin-top: 8px;
-    margin-bottom: 8px;
-}
-
-#controls button,
-#btn-generate-brain {
-    width: 150px;
-    margin: 5px 5px 5px 0;
-    padding: 8px;
-    background: #1f2a3a;
-    color: #fff;
-    border: 1px solid #444;
-    cursor: pointer;
-}
-
-#controls button:hover,
-#btn-generate-brain:hover {
-    background: #27334a;
-}
-
-/* Pamięć – miniatury */
-
+/* Miniatury */
 #memory-list {
-    margin-top: 10px;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -85,12 +143,10 @@ body {
     border: 2px solid #ffcc00;
 }
 
-/* Wybór koloru */
-
+/* Kolory */
 #color-picker {
     display: flex;
     gap: 6px;
-    margin-bottom: 10px;
 }
 
 .color-swatch {
@@ -98,23 +154,4 @@ body {
     height: 24px;
     border: 2px solid #333;
     cursor: pointer;
-}
-
-/* Formularze / inputy / selecty */
-
-#right-panel input,
-#right-panel select {
-    width: 150px;
-    margin: 5px 0;
-    padding: 4px;
-    background: #1a2333;
-    color: #fff;
-    border: 1px solid #333;
-}
-
-/* Parametry losowe – kosmetyka */
-
-#random-params label {
-    display: inline-block;
-    width: 40px;
 }

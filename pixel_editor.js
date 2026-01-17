@@ -1,61 +1,72 @@
-console.log("pixel_editor.js loaded");
-
-let pixelEditorCtx;
-let pixelData = new Array(256).fill("#00000000");
-let currentColor = "#44ff44";
+let pixelCanvas = null;
+let pixelCtx = null;
 
 function initPixelEditor() {
-    const canvas = document.getElementById("pixel-editor");
-    pixelEditorCtx = canvas.getContext("2d");
+    pixelCanvas = document.getElementById("pixel-editor");
+    pixelCanvas.width = 64;
+    pixelCanvas.height = 64;
+    pixelCtx = pixelCanvas.getContext("2d");
 
-    canvas.width = 256;
-    canvas.height = 256;
+    pixelCtx.fillStyle = "rgb(0,0,0)";
+    pixelCtx.fillRect(0, 0, 64, 64);
 
-    // wybór koloru
-    document.querySelectorAll(".color-swatch").forEach(s => {
-        s.onclick = () => {
-            currentColor = s.dataset.col;
-        };
+    pixelCanvas.addEventListener("mousedown", paintPixel);
+    pixelCanvas.addEventListener("mousemove", (e) => {
+        if (e.buttons === 1) paintPixel(e);
     });
-
-    canvas.addEventListener("click", e => {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-
-        const x = Math.floor((e.clientX - rect.left) * scaleX / 16);
-        const y = Math.floor((e.clientY - rect.top) * scaleY / 16);
-
-        const i = y * 16 + x;
-
-        // gumka = klik drugi raz
-        pixelData[i] = pixelData[i] === currentColor ? "#00000000" : currentColor;
-
-        drawPixelEditor();
-    });
-
-    drawPixelEditor();
 }
+
+function paintPixel(e) {
+    const rect = pixelCanvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / 4) * 4;
+    const y = Math.floor((e.clientY - rect.top) / 4) * 4;
+
+    pixelCtx.fillStyle = currentColor;
+    pixelCtx.fillRect(x, y, 4, 4);
+}
+
+// ---------------------------------------------
+//  RGB IMAGE → ARRAY[256]
+// ---------------------------------------------
 
 function getPixelImage() {
-    return [...pixelData];
-}
-
-function setPixelImage(data) {
-    pixelData = [...data];
-    drawPixelEditor();
-}
-
-function drawPixelEditor() {
-    pixelEditorCtx.fillStyle = "#000";
-    pixelEditorCtx.fillRect(0, 0, 256, 256);
+    const img = new Array(256);
+    const data = pixelCtx.getImageData(0, 0, 64, 64).data;
 
     for (let i = 0; i < 256; i++) {
-        if (pixelData[i] !== "#00000000") {
-            const x = (i % 16) * 16;
-            const y = Math.floor(i / 16) * 16;
-            pixelEditorCtx.fillStyle = pixelData[i];
-            pixelEditorCtx.fillRect(x, y, 16, 16);
+        const x = (i % 16) * 4;
+        const y = Math.floor(i / 16) * 4;
+
+        const idx = (y * 64 + x) * 4;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const a = data[idx + 3];
+
+        if (a === 0) {
+            img[i] = "rgb(0,0,0)";
+        } else {
+            img[i] = `rgb(${r},${g},${b})`;
+        }
+    }
+
+    return img;
+}
+
+// ---------------------------------------------
+//  ARRAY[256] → RGB IMAGE
+// ---------------------------------------------
+
+function setPixelImage(img) {
+    pixelCtx.clearRect(0, 0, 64, 64);
+
+    for (let i = 0; i < 256; i++) {
+        const col = img[i];
+        if (col !== "rgb(0,0,0)") {
+            const x = (i % 16) * 4;
+            const y = Math.floor(i / 16) * 4;
+            pixelCtx.fillStyle = col;
+            pixelCtx.fillRect(x, y, 4, 4);
         }
     }
 }
