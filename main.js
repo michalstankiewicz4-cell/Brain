@@ -17,7 +17,11 @@ window.onload = () => {
     resize();
 
     function loop() {
-        updateBrain3D(0.016);
+        const dt = 0.016;  // ~60 FPS
+        
+        updateBrain3D(dt);
+        updateVisualization(dt);  // Update energy particles and pulses
+        
         renderBrain(ctx, getBrainState());
         requestAnimationFrame(loop);
     }

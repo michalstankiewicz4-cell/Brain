@@ -51,12 +51,12 @@ function initUI() {
     };
 
     document.getElementById("btn-clear").onclick = () => {
-        // Wyczyść canvas edytora
+        // Clear editor canvas
         pixelCtx.fillStyle = "rgb(0,0,0)";
-        pixelCtx.fillRect(0, 0, 64, 64);
+        pixelCtx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
     };
 
-    // przycisk delete w sekcji miniatur
+    // Delete button in thumbnails section
     document.getElementById("btn-delete").onclick = () => {
         if (selectedMemoryIndex !== null) {
             deleteMemory(selectedMemoryIndex);
@@ -65,17 +65,33 @@ function initUI() {
         }
     };
 
-    // przyciski pamięci mózgu
+    // Brain memory buttons
     document.getElementById("btn-brain-save").onclick = () => {
         const saveMethod = document.getElementById("save-method").value;
         const img = getPixelImage();
-        saveToBrain(saveMethod, img);
+        
+        // Async callback for completion
+        saveToBrain(saveMethod, img, (success) => {
+            if (success) {
+                console.log("Save completed successfully!");
+            } else {
+                console.error("Save failed!");
+            }
+        });
     };
 
     document.getElementById("btn-brain-load").onclick = () => {
         const loadMethod = document.getElementById("load-method").value;
-        const img = loadFromBrain(loadMethod);
-        drawBrainOutput(img);
+        
+        // Async callback for completion
+        loadFromBrain(loadMethod, (img) => {
+            if (img) {
+                drawBrainOutput(img);
+                console.log("Load completed successfully!");
+            } else {
+                console.error("Load failed!");
+            }
+        });
     };
 
     // przycisk GENERUJ MÓZG

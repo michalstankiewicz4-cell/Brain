@@ -138,18 +138,18 @@
             <div class="form-row">
                 <label>Save method:</label>
                 <select id="save-method">
-                    <option value="direct">Direct write</option>
-                    <option value="hebb">Hebb</option>
+                    <option value="attractor">Attractor Dynamics</option>
                     <option value="hopfield">Hopfield</option>
+                    <option value="hebb">Hebb (not implemented)</option>
                 </select>
             </div>
 
             <div class="form-row">
                 <label>Load method:</label>
                 <select id="load-method">
-                    <option value="direct">Direct read</option>
-                    <option value="hebb">Hebb</option>
+                    <option value="attractor">Attractor Dynamics</option>
                     <option value="hopfield">Hopfield</option>
+                    <option value="hebb">Hebb (not implemented)</option>
                 </select>
             </div>
 
@@ -190,6 +190,7 @@
 <script src="brain3d.js"></script>
 <script src="brain_render.js"></script>
 <script src="brain_memory.js"></script>
+<script src="brain_visualization.js"></script>
 <script src="pixel_editor.js"></script>
 
 <!-- NEW 3 UI FILES -->

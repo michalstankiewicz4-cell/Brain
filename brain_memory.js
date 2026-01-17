@@ -1,13 +1,24 @@
 // ---------------------------------------------
-//  BRAIN MEMORY – FULL RGB COLORS (Hopfield)
+//  BRAIN MEMORY SYSTEM
+//  Supports: Hopfield (legacy) + Attractor Dynamics (new)
 // ---------------------------------------------
 
 let hopfieldR = null;
 let hopfieldG = null;
 let hopfieldB = null;
 
+// Attractor Dynamics state
+let attractorState = {
+    isEncoding: false,
+    isRecalling: false,
+    phase: 'idle',  // idle, encoding, strengthening, recalling, converging
+    progress: 0,
+    animationFrame: null,
+    energyParticles: []  // for visualization
+};
+
 // ---------------------------------------------
-//  Normalization
+//  NORMALIZATION
 // ---------------------------------------------
 
 function normalizeRGB(v) {
@@ -22,7 +33,7 @@ function denormalizeRGB(v) {
 }
 
 // ---------------------------------------------
-//  Hopfield
+//  HOPFIELD NETWORK (LEGACY)
 // ---------------------------------------------
 
 function Hopfield(size) {
@@ -55,15 +66,200 @@ Hopfield.prototype.recall = function (input) {
 };
 
 // ---------------------------------------------
-//  SAVE TO BRAIN
+//  ATTRACTOR DYNAMICS - ADAPTIVE NEURAL MEMORY
 // ---------------------------------------------
 
-function saveToBrain(method, img) {
-    if (method !== "hopfield") {
-        console.warn("Other methods do not support colors yet.");
+function saveAttractorToBrain(img, onProgress, onComplete) {
+    if (!brain.neurons || brain.neurons.length === 0) {
+        console.warn("No brain generated. Please generate brain first.");
+        if (onComplete) onComplete(false);
         return;
     }
 
+    attractorState.isEncoding = true;
+    attractorState.phase = 'encoding';
+    attractorState.progress = 0;
+
+    // PHASE 1: ENCODING - Activate input neurons
+    console.log("PHASE 1: Encoding image to neurons...");
+    stimulateBrainFromImage(img);
+    
+    const totalPhases = 4;
+    let currentPhase = 1;
+    
+    setTimeout(() => {
+        attractorState.phase = 'strengthening';
+        attractorState.progress = 0.25;
+        currentPhase = 2;
+        
+        // PHASE 2: STRENGTHENING - Hebbian learning on connections
+        console.log("PHASE 2: Strengthening connections (Hebbian learning)...");
+        strengthenConnections();
+        
+        setTimeout(() => {
+            attractorState.phase = 'stabilizing';
+            attractorState.progress = 0.5;
+            currentPhase = 3;
+            
+            // PHASE 3: PROPAGATION - Let activation spread through network
+            console.log("PHASE 3: Propagating activation through network...");
+            propagateActivation(5); // 5 iterations
+            
+            setTimeout(() => {
+                attractorState.phase = 'complete';
+                attractorState.progress = 1.0;
+                attractorState.isEncoding = false;
+                
+                console.log("PHASE 4: Encoding complete! Pattern stored in neural structure.");
+                
+                if (onComplete) onComplete(true);
+            }, 800);
+            
+        }, 1000);
+        
+    }, 1200);
+}
+
+function loadAttractorFromBrain(onProgress, onComplete) {
+    if (!brain.neurons || brain.neurons.length === 0) {
+        console.warn("No brain generated.");
+        if (onComplete) onComplete(null);
+        return;
+    }
+
+    attractorState.isRecalling = true;
+    attractorState.phase = 'recalling';
+    attractorState.progress = 0;
+
+    // PHASE 1: SPONTANEOUS ACTIVATION - Add noise to start recall
+    console.log("PHASE 1: Initiating spontaneous activation...");
+    addSpontaneousNoise(0.3);
+    
+    setTimeout(() => {
+        attractorState.phase = 'converging';
+        attractorState.progress = 0.33;
+        
+        // PHASE 2: CONVERGENCE - Let network settle into attractor
+        console.log("PHASE 2: Network converging to attractor...");
+        propagateActivation(10); // More iterations for convergence
+        
+        setTimeout(() => {
+            attractorState.progress = 0.66;
+            
+            // PHASE 3: STABILIZATION - Final refinement
+            console.log("PHASE 3: Stabilizing pattern...");
+            propagateActivation(5);
+            
+            setTimeout(() => {
+                attractorState.phase = 'reading';
+                attractorState.progress = 1.0;
+                
+                // PHASE 4: READ OUT - Extract pattern from neurons
+                console.log("PHASE 4: Reading pattern from neurons...");
+                const img = readImageFromBrain();
+                
+                attractorState.isRecalling = false;
+                attractorState.phase = 'idle';
+                
+                if (onComplete) onComplete(img);
+            }, 600);
+            
+        }, 1000);
+        
+    }, 1000);
+}
+
+// ---------------------------------------------
+//  ATTRACTOR HELPER FUNCTIONS
+// ---------------------------------------------
+
+function strengthenConnections() {
+    // Hebbian learning: neurons that fire together, wire together
+    brain.neurons.forEach(neuron => {
+        const act1 = neuron.activation || 0;
+        
+        neuron.connections.forEach(conn => {
+            const targetNeuron = brain.neurons[conn.target];
+            const act2 = targetNeuron.activation || 0;
+            
+            // Increase weight if both neurons are active
+            const deltaWeight = 0.1 * act1 * act2;
+            conn.weight = Math.min(1.0, conn.weight + deltaWeight);
+        });
+    });
+}
+
+function propagateActivation(iterations) {
+    for (let iter = 0; iter < iterations; iter++) {
+        const newActivations = new Array(brain.neurons.length).fill(0);
+        
+        brain.neurons.forEach((neuron, i) => {
+            let input = neuron.activation || 0;
+            
+            // Receive input from connected neurons
+            neuron.connections.forEach(conn => {
+                const sourceActivation = brain.neurons[conn.target].activation || 0;
+                input += sourceActivation * conn.weight * 0.5;
+            });
+            
+            // Apply sigmoid activation function
+            newActivations[i] = sigmoid(input);
+        });
+        
+        // Update activations
+        brain.neurons.forEach((neuron, i) => {
+            neuron.activation = newActivations[i];
+        });
+    }
+}
+
+function addSpontaneousNoise(strength) {
+    brain.neurons.forEach(neuron => {
+        // Add small random activation to break symmetry
+        neuron.activation = (neuron.activation || 0) + (Math.random() - 0.5) * strength;
+        neuron.activation = Math.max(0, Math.min(1, neuron.activation));
+    });
+}
+
+function sigmoid(x) {
+    return 1 / (1 + Math.exp(-4 * (x - 0.5)));
+}
+
+// ---------------------------------------------
+//  MAIN SAVE/LOAD INTERFACE
+// ---------------------------------------------
+
+function saveToBrain(method, img, onComplete) {
+    if (method === "attractor") {
+        saveAttractorToBrain(img, null, onComplete);
+    } else if (method === "hopfield") {
+        saveHopfieldToBrain(img);
+        if (onComplete) onComplete(true);
+    } else {
+        console.warn("Method '" + method + "' not implemented yet.");
+        if (onComplete) onComplete(false);
+    }
+}
+
+function loadFromBrain(method, onComplete) {
+    if (method === "attractor") {
+        loadAttractorFromBrain(null, onComplete);
+    } else if (method === "hopfield") {
+        const img = loadHopfieldFromBrain();
+        if (onComplete) onComplete(img);
+        return img;
+    } else {
+        console.warn("Method '" + method + "' not implemented yet.");
+        if (onComplete) onComplete(null);
+        return new Array(256).fill("rgb(0,0,0)");
+    }
+}
+
+// ---------------------------------------------
+//  HOPFIELD LEGACY FUNCTIONS (renamed)
+// ---------------------------------------------
+
+function saveHopfieldToBrain(img) {
     const size = 256;
 
     if (!hopfieldR) hopfieldR = new Hopfield(size);
@@ -100,16 +296,7 @@ function saveToBrain(method, img) {
     console.log("Saved full RGB colors to brain (Hopfield).");
 }
 
-// ---------------------------------------------
-//  LOAD FROM BRAIN
-// ---------------------------------------------
-
-function loadFromBrain(method) {
-    if (method !== "hopfield") {
-        console.warn("Other methods do not support colors yet.");
-        return new Array(256).fill("rgb(0,0,0)");
-    }
-
+function loadHopfieldFromBrain() {
     if (!hopfieldR || !hopfieldG || !hopfieldB) {
         console.warn("Brain is empty.");
         return new Array(256).fill("rgb(0,0,0)");
@@ -133,4 +320,12 @@ function loadFromBrain(method) {
     }
 
     return out;
+}
+
+// ---------------------------------------------
+//  GET ATTRACTOR STATE (for visualization)
+// ---------------------------------------------
+
+function getAttractorState() {
+    return attractorState;
 }
