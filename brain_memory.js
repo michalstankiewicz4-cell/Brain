@@ -102,9 +102,9 @@ function saveAttractorToBrain(img, onProgress, onComplete) {
             attractorState.progress = 0.5;
             currentPhase = 3;
             
-            // PHASE 3: PROPAGATION - Let activation spread through network
-            console.log("PHASE 3: Propagating activation through network...");
-            propagateActivation(5); // 5 iterations
+            // PHASE 3: SKIP PROPAGATION - Preserve exact pattern from encoding
+            console.log("PHASE 3: Preserving activation pattern (no propagation)...");
+            // NO propagateActivation() - it blurs the color pattern!
             
             setTimeout(() => {
                 attractorState.phase = 'complete';
