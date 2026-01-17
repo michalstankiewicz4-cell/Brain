@@ -254,12 +254,157 @@ function sigmoid(x) {
 }
 
 // ---------------------------------------------
+//  PURE ATTRACTOR - TRUE NEURAL MEMORY
+//  (No backup, pattern stored only in connection weights)
+// ---------------------------------------------
+
+function savePureAttractorToBrain(img, onProgress, onComplete) {
+    if (!brain.neurons || brain.neurons.length === 0) {
+        console.warn("No brain generated. Please generate brain first.");
+        if (onComplete) onComplete(false);
+        return;
+    }
+
+    attractorState.isEncoding = true;
+    attractorState.phase = 'encoding';
+    attractorState.progress = 0;
+
+    // PHASE 1: ENCODING - Activate input neurons
+    console.log("PURE ATTRACTOR - PHASE 1: Encoding image to neurons...");
+    stimulateBrainFromImage(img);
+    
+    setTimeout(() => {
+        attractorState.phase = 'strengthening';
+        attractorState.progress = 0.33;
+        
+        // PHASE 2: STRONG HEBBIAN LEARNING - Critical for pure attractor!
+        console.log("PURE ATTRACTOR - PHASE 2: Strong Hebbian learning (NO backup!)...");
+        strongHebbian(0.5); // Much stronger learning rate
+        
+        setTimeout(() => {
+            attractorState.phase = 'reinforcing';
+            attractorState.progress = 0.66;
+            
+            // PHASE 3: REINFORCEMENT - Multiple Hebbian passes
+            console.log("PURE ATTRACTOR - PHASE 3: Reinforcing pattern in weights...");
+            strongHebbian(0.3);
+            strongHebbian(0.2);
+            
+            setTimeout(() => {
+                attractorState.phase = 'complete';
+                attractorState.progress = 1.0;
+                attractorState.isEncoding = false;
+                
+                // NO BACKUP - Pattern stored ONLY in connection weights!
+                console.log("PURE ATTRACTOR - PHASE 4: Pattern stored in connection weights only!");
+                const activeCount = brain.neurons.filter(n => (n.activation || 0) > 0.1).length;
+                console.log(`Training complete: ${activeCount} active neurons, weights updated`);
+                
+                if (onComplete) onComplete(true);
+            }, 1000);
+            
+        }, 1200);
+        
+    }, 1200);
+}
+
+function loadPureAttractorFromBrain(onProgress, onComplete) {
+    if (!brain.neurons || brain.neurons.length === 0) {
+        console.warn("No brain generated.");
+        if (onComplete) onComplete(null);
+        return;
+    }
+
+    attractorState.isRecalling = true;
+    attractorState.phase = 'recalling';
+    attractorState.progress = 0;
+
+    // PHASE 1: RANDOM INITIALIZATION - Start from noise
+    console.log("PURE ATTRACTOR - PHASE 1: Starting from random noise...");
+    clearActivations();
+    addSpontaneousNoise(0.4); // Higher noise to explore state space
+    
+    setTimeout(() => {
+        attractorState.phase = 'converging';
+        attractorState.progress = 0.2;
+        
+        // PHASE 2: HEAVY CONVERGENCE - Let network find attractor
+        console.log("PURE ATTRACTOR - PHASE 2: Converging to attractor (25 iterations)...");
+        propagateActivation(25); // Many iterations!
+        
+        setTimeout(() => {
+            attractorState.progress = 0.5;
+            
+            // PHASE 3: DEEP STABILIZATION - Lock into pattern
+            console.log("PURE ATTRACTOR - PHASE 3: Deep stabilization (25 iterations)...");
+            propagateActivation(25);
+            
+            setTimeout(() => {
+                attractorState.progress = 0.8;
+                
+                // PHASE 4: FINAL REFINEMENT
+                console.log("PURE ATTRACTOR - PHASE 4: Final refinement (15 iterations)...");
+                propagateActivation(15);
+                
+                setTimeout(() => {
+                    attractorState.phase = 'reading';
+                    attractorState.progress = 1.0;
+                    
+                    // READ OUT - Extract pattern from converged state
+                    console.log("PURE ATTRACTOR - PHASE 5: Reading converged pattern...");
+                    const img = readImageFromBrain();
+                    
+                    // DEBUG
+                    let activeCount = 0;
+                    brain.neurons.forEach(n => {
+                        if (n.activation > 0.1) activeCount++;
+                    });
+                    console.log(`Converged state: ${activeCount} / ${brain.neurons.length} active neurons`);
+                    console.log("First 10 colors:", img.slice(0, 10));
+                    
+                    attractorState.isRecalling = false;
+                    attractorState.phase = 'idle';
+                    
+                    if (onComplete) onComplete(img);
+                }, 1000);
+                
+            }, 2000);
+            
+        }, 2000);
+        
+    }, 1500);
+}
+
+// Strong Hebbian learning with configurable rate
+function strongHebbian(learningRate) {
+    brain.neurons.forEach(neuron => {
+        const act1 = neuron.activation || 0;
+        
+        neuron.connections.forEach(conn => {
+            const targetNeuron = brain.neurons[conn.target];
+            const act2 = targetNeuron.activation || 0;
+            
+            // Strong weight increase when both active
+            const deltaWeight = learningRate * act1 * act2;
+            conn.weight = Math.min(1.0, conn.weight + deltaWeight);
+            
+            // Weight decay when both inactive (anti-Hebbian)
+            if (act1 < 0.1 && act2 < 0.1) {
+                conn.weight = Math.max(0.0, conn.weight - learningRate * 0.05);
+            }
+        });
+    });
+}
+
+// ---------------------------------------------
 //  MAIN SAVE/LOAD INTERFACE
 // ---------------------------------------------
 
 function saveToBrain(method, img, onComplete) {
     if (method === "attractor") {
         saveAttractorToBrain(img, null, onComplete);
+    } else if (method === "pure-attractor") {
+        savePureAttractorToBrain(img, null, onComplete);
     } else if (method === "hopfield") {
         saveHopfieldToBrain(img);
         if (onComplete) onComplete(true);
@@ -272,6 +417,8 @@ function saveToBrain(method, img, onComplete) {
 function loadFromBrain(method, onComplete) {
     if (method === "attractor") {
         loadAttractorFromBrain(null, onComplete);
+    } else if (method === "pure-attractor") {
+        loadPureAttractorFromBrain(null, onComplete);
     } else if (method === "hopfield") {
         const img = loadHopfieldFromBrain();
         if (onComplete) onComplete(img);
