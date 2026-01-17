@@ -31,10 +31,11 @@ Data analizy: 2026-01-17
 **Problem:** Dwa niezależne systemy pamięci - Hopfield i struktura 3D
 **Skutek:** Wizualizacja 3D nie pokazuje rzeczywistego stanu pamięci
 
-### 5. NIEKONSEKWENTNY ROZMIAR OBRAZU
+### 5. NIEKONSEKWENTNY ROZMIAR OBRAZU ✅ FIXED
 **Lokalizacja:** `pixel_editor.js`
 **Problem:** Canvas 64×64px, siatka logiczna 16×16, każdy piksel = 4×4px
 **Skutek:** Potencjalne błędy w obliczeniach współrzędnych
+**ROZWIĄZANIE:** Zrefaktoryzowano z funkcjami pomocniczymi (gridToCanvas, indexToGrid, getPixelColor)
 
 ### 6. BRAK OBSŁUGI METOD "direct" i "hebb"
 **Lokalizacja:** `brain_memory.js`

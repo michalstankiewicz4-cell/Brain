@@ -1,92 +1,144 @@
+// ---------------------------------------------
+//  PIXEL EDITOR - CONFIGURATION
+// ---------------------------------------------
+
 let pixelCanvas = null;
 let pixelCtx = null;
-let currentColor = "#ffffff"; // domyślny biały kolor
+let currentColor = "#ffffff"; // default white color
+
+// Configuration constants
+const CANVAS_SIZE = 64;
+const GRID_SIZE = 16;
+const PIXEL_SIZE = CANVAS_SIZE / GRID_SIZE;  // 4px
+const TOTAL_PIXELS = GRID_SIZE * GRID_SIZE;  // 256
+
+// ---------------------------------------------
+//  HELPER FUNCTIONS - COORDINATE CONVERSION
+// ---------------------------------------------
+
+// Convert grid coordinates (0-15) to canvas coordinates (0-60)
+function gridToCanvas(gridX, gridY) {
+    return {
+        x: gridX * PIXEL_SIZE,
+        y: gridY * PIXEL_SIZE
+    };
+}
+
+// Convert linear index (0-255) to grid coordinates (0-15)
+function indexToGrid(index) {
+    return {
+        x: index % GRID_SIZE,
+        y: Math.floor(index / GRID_SIZE)
+    };
+}
+
+// Get pixel color from ImageData at canvas coordinates
+function getPixelColor(imageData, canvasX, canvasY) {
+    const idx = (canvasY * CANVAS_SIZE + canvasX) * 4;  // RGBA index
+    const r = imageData.data[idx];
+    const g = imageData.data[idx + 1];
+    const b = imageData.data[idx + 2];
+    const a = imageData.data[idx + 3];
+    
+    return a === 0 ? "rgb(0,0,0)" : `rgb(${r},${g},${b})`;
+}
+
+// ---------------------------------------------
+//  INITIALIZATION
+// ---------------------------------------------
 
 function initPixelEditor() {
     pixelCanvas = document.getElementById("pixel-editor");
-    pixelCanvas.width = 64;
-    pixelCanvas.height = 64;
+    pixelCanvas.width = CANVAS_SIZE;
+    pixelCanvas.height = CANVAS_SIZE;
     pixelCtx = pixelCanvas.getContext("2d");
 
+    // Clear canvas to black
     pixelCtx.fillStyle = "rgb(0,0,0)";
-    pixelCtx.fillRect(0, 0, 64, 64);
+    pixelCtx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
+    // Mouse event listeners
     pixelCanvas.addEventListener("mousedown", paintPixel);
     pixelCanvas.addEventListener("mousemove", (e) => {
         if (e.buttons === 1) paintPixel(e);
     });
 
-    // Event listenery dla palety kolorów
+    // Color picker event listeners
     const swatches = document.querySelectorAll('.color-swatch');
     swatches.forEach(swatch => {
         swatch.addEventListener('click', () => {
             currentColor = swatch.dataset.col;
-            // Wizualne zaznaczenie wybranego koloru
+            // Visual selection of chosen color
             swatches.forEach(s => s.classList.remove('selected'));
             swatch.classList.add('selected');
         });
     });
 
-    // Zaznacz pierwszy kolor jako domyślny
+    // Select last color (white) as default
     if (swatches.length > 0) {
-        swatches[swatches.length - 1].classList.add('selected'); // biały
+        swatches[swatches.length - 1].classList.add('selected');
     }
 }
 
+// ---------------------------------------------
+//  PAINTING
+// ---------------------------------------------
+
 function paintPixel(e) {
     const rect = pixelCanvas.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) / 4) * 4;
-    const y = Math.floor((e.clientY - rect.top) / 4) * 4;
-
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    // Convert mouse position to grid coordinates
+    const gridX = Math.floor(mouseX / PIXEL_SIZE);
+    const gridY = Math.floor(mouseY / PIXEL_SIZE);
+    
+    // Boundary check
+    if (gridX < 0 || gridX >= GRID_SIZE || gridY < 0 || gridY >= GRID_SIZE) {
+        return;
+    }
+    
+    // Convert to canvas coordinates (snapped to grid)
+    const canvas = gridToCanvas(gridX, gridY);
+    
     pixelCtx.fillStyle = currentColor;
-    pixelCtx.fillRect(x, y, 4, 4);
+    pixelCtx.fillRect(canvas.x, canvas.y, PIXEL_SIZE, PIXEL_SIZE);
 }
 
 // ---------------------------------------------
-//  RGB IMAGE → ARRAY[256]
+//  IMAGE CONVERSION - CANVAS → ARRAY[256]
 // ---------------------------------------------
 
 function getPixelImage() {
-    const img = new Array(256);
-    const data = pixelCtx.getImageData(0, 0, 64, 64).data;
+    const img = new Array(TOTAL_PIXELS);
+    const imageData = pixelCtx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    for (let i = 0; i < 256; i++) {
-        const x = (i % 16) * 4;
-        const y = Math.floor(i / 16) * 4;
-
-        const idx = (y * 64 + x) * 4;
-        const r = data[idx];
-        const g = data[idx + 1];
-        const b = data[idx + 2];
-        const a = data[idx + 3];
-
-        if (a === 0) {
-            img[i] = "rgb(0,0,0)";
-        } else {
-            img[i] = `rgb(${r},${g},${b})`;
-        }
+    for (let i = 0; i < TOTAL_PIXELS; i++) {
+        const grid = indexToGrid(i);
+        const canvas = gridToCanvas(grid.x, grid.y);
+        img[i] = getPixelColor(imageData, canvas.x, canvas.y);
     }
 
     return img;
 }
 
 // ---------------------------------------------
-//  ARRAY[256] → RGB IMAGE
+//  IMAGE CONVERSION - ARRAY[256] → CANVAS
 // ---------------------------------------------
 
 function setPixelImage(img) {
-    // Najpierw wyczyść cały canvas na czarno
+    // Clear entire canvas to black
     pixelCtx.fillStyle = "rgb(0,0,0)";
-    pixelCtx.fillRect(0, 0, 64, 64);
+    pixelCtx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    // Następnie narysuj tylko niezerowe piksele
-    for (let i = 0; i < 256; i++) {
-        const col = img[i];
-        if (col !== "rgb(0,0,0)") {
-            const x = (i % 16) * 4;
-            const y = Math.floor(i / 16) * 4;
-            pixelCtx.fillStyle = col;
-            pixelCtx.fillRect(x, y, 4, 4);
+    // Draw only non-black pixels
+    for (let i = 0; i < TOTAL_PIXELS; i++) {
+        if (img[i] !== "rgb(0,0,0)") {
+            const grid = indexToGrid(i);
+            const canvas = gridToCanvas(grid.x, grid.y);
+            
+            pixelCtx.fillStyle = img[i];
+            pixelCtx.fillRect(canvas.x, canvas.y, PIXEL_SIZE, PIXEL_SIZE);
         }
     }
 }

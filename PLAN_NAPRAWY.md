@@ -336,17 +336,18 @@ function setPixelImage(img) {
 }
 ```
 
-**Status:** DO WYKONANIA
+**Status:** ✅ COMPLETED - Refactored with helper functions (gridToCanvas, indexToGrid, getPixelColor)
 
 ---
 
 ## KOLEJNOŚĆ WYKONANIA (REKOMENDOWANA)
 
-### ✅ FAZA 1 - PODSTAWY (1-2h)
+### ✅ FAZA 1 - PODSTAWY (1-2h) - COMPLETED ✓
 1. ✓ Analiza błędów (DONE)
-2. ETAP 1: Unifikacja formatów kolorów
-3. ETAP 2: Wybór koloru w edytorze
-4. ETAP 7.1: Naprawa setPixelImage()
+2. ✓ ETAP 1: Unifikacja formatów kolorów (DONE)
+3. ✓ ETAP 2: Wybór koloru w edytorze (DONE)
+4. ✓ ETAP 7.1: Naprawa setPixelImage() (DONE)
+5. ✓ BONUS: Refaktoryzacja pixel_editor.js z funkcjami pomocniczymi (DONE)
 
 ### ✅ FAZA 2 - GŁÓWNA FUNKCJONALNOŚĆ (2-3h)
 5. ETAP 3.1: Podpięcie stimulateBrainFromImage()
