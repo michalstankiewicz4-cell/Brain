@@ -90,6 +90,9 @@ function stimulateBrainFromImage(image) {
         
         if (!neuronGroup || neuronGroup.length === 0) continue;
         
+        // Skip black pixels - don't activate neurons for empty space
+        if (col === "rgb(0,0,0)" || !col) continue;
+        
         // Parse RGB color
         const rgb = parseRGB(col);
         
