@@ -1,5 +1,5 @@
 // ---------------------------------------------
-//  PAMIĘĆ MÓZGU – PEŁNE KOLORY RGB (Hopfield)
+//  BRAIN MEMORY – FULL RGB COLORS (Hopfield)
 // ---------------------------------------------
 
 let hopfieldR = null;
@@ -7,7 +7,7 @@ let hopfieldG = null;
 let hopfieldB = null;
 
 // ---------------------------------------------
-//  Normalizacja
+//  Normalization
 // ---------------------------------------------
 
 function normalizeRGB(v) {
@@ -55,12 +55,12 @@ Hopfield.prototype.recall = function (input) {
 };
 
 // ---------------------------------------------
-//  ZAPIS DO MÓZGU
+//  SAVE TO BRAIN
 // ---------------------------------------------
 
 function saveToBrain(method, img) {
     if (method !== "hopfield") {
-        console.warn("Inne metody nie obsługują kolorów.");
+        console.warn("Other methods do not support colors yet.");
         return;
     }
 
@@ -97,21 +97,21 @@ function saveToBrain(method, img) {
     hopfieldG.train(G);
     hopfieldB.train(B);
 
-    console.log("Zapisano pełne kolory RGB do mózgu (Hopfield).");
+    console.log("Saved full RGB colors to brain (Hopfield).");
 }
 
 // ---------------------------------------------
-//  ODCZYT Z MÓZGU
+//  LOAD FROM BRAIN
 // ---------------------------------------------
 
 function loadFromBrain(method) {
     if (method !== "hopfield") {
-        console.warn("Inne metody nie obsługują kolorów.");
+        console.warn("Other methods do not support colors yet.");
         return new Array(256).fill("rgb(0,0,0)");
     }
 
     if (!hopfieldR || !hopfieldG || !hopfieldB) {
-        console.warn("Mózg jest pusty.");
+        console.warn("Brain is empty.");
         return new Array(256).fill("rgb(0,0,0)");
     }
 

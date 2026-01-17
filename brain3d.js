@@ -50,7 +50,7 @@ function setupPixelMapping() {
 
     if (count === 0) return;
 
-    // dla każdego z 256 pikseli losujemy neuron
+    // for each of 256 pixels, we randomly assign a neuron
     for (let i = 0; i < 256; i++) {
         pixelToNeuronMap[i] = randInt(0, count - 1);
     }
@@ -64,8 +64,8 @@ function clearActivations() {
     }
 }
 
-// USTAWIENIE AKTYWACJI NA PODSTAWIE OBRAZU 16×16
-// image: tablica 256 kolorów (tak jak w edytorze)
+// SET ACTIVATION BASED ON 16×16 IMAGE
+// image: array of 256 colors (as in the editor)
 function stimulateBrainFromImage(image) {
     if (!brain.neurons || brain.neurons.length === 0) return;
 
@@ -73,10 +73,10 @@ function stimulateBrainFromImage(image) {
 
     for (let i = 0; i < 256 && i < image.length; i++) {
         const col = image[i];
-        if (col && col !== "#00000000") {
+        if (col && col !== "rgb(0,0,0)") {
             const neuronId = pixelToNeuronMap[i];
             if (neuronId !== null && neuronId >= 0 && neuronId < brain.neurons.length) {
-                // prosta aktywacja binarna
+                // simple binary activation
                 brain.neurons[neuronId].activation = 1;
             }
         }
@@ -85,10 +85,10 @@ function stimulateBrainFromImage(image) {
     console.log("Brain stimulated from image");
 }
 
-// ODCZYT OBRAZU Z AKTYWACJI NEURONÓW
-// proste: jeśli neuron przypisany do piksela ma activation>0, rysujemy biały piksel
+// READ IMAGE FROM NEURON ACTIVATIONS
+// simple: if neuron assigned to pixel has activation>0, draw white pixel
 function readImageFromBrain() {
-    const img = new Array(256).fill("#00000000");
+    const img = new Array(256).fill("rgb(0,0,0)");
     if (!brain.neurons || brain.neurons.length === 0) return img;
 
     for (let i = 0; i < 256; i++) {
@@ -96,7 +96,7 @@ function readImageFromBrain() {
         if (neuronId !== null && neuronId >= 0 && neuronId < brain.neurons.length) {
             const act = brain.neurons[neuronId].activation || 0;
             if (act > 0.5) {
-                img[i] = "#ffffff";
+                img[i] = "rgb(255,255,255)";
             }
         }
     }
@@ -105,15 +105,15 @@ function readImageFromBrain() {
 }
 
 // -------------------------
-// GENERATORY MÓZGU (STAŁE / LOSOWE + TRYB POŁĄCZEŃ)
+// BRAIN GENERATORS (FIXED / RANDOM + CONNECTION MODE)
 // -------------------------
 
-// STAŁE WARTOŚCI
+// FIXED VALUES
 function generateBrain(count, dendrites, connections, weight, connMode) {
     brain.neurons = [];
     brain.params = { count, dendrites, connections, weight, connMode, mode: "fixed" };
 
-    // tworzymy neurony
+    // create neurons
     for (let i = 0; i < count; i++) {
         const pos = randomPointInSphere();
         brain.neurons.push({
@@ -127,7 +127,7 @@ function generateBrain(count, dendrites, connections, weight, connMode) {
     }
 
     if (connMode === "random") {
-        // LOSOWE POŁĄCZENIA
+        // RANDOM CONNECTIONS
         for (let i = 0; i < count; i++) {
             const n = brain.neurons[i];
             for (let c = 0; c < connections; c++) {
@@ -137,7 +137,7 @@ function generateBrain(count, dendrites, connections, weight, connMode) {
             }
         }
     } else {
-        // POŁĄCZENIA DO NAJBLIŻSZYCH
+        // CONNECTIONS TO NEAREST NEIGHBORS
         for (let i = 0; i < count; i++) {
             const n = brain.neurons[i];
             const distances = brain.neurons
@@ -161,12 +161,12 @@ function generateBrain(count, dendrites, connections, weight, connMode) {
     console.log("Brain generated (fixed, " + connMode + "):", brain);
 }
 
-// LOSOWE WARTOŚCI
+// RANDOM VALUES
 function generateBrainRandom(count, dendMin, dendMax, connMin, connMax, wMin, wMax, connMode) {
     brain.neurons = [];
     brain.params = { count, dendMin, dendMax, connMin, connMax, wMin, wMax, connMode, mode: "random" };
 
-    // tworzymy neurony
+    // create neurons
     for (let i = 0; i < count; i++) {
         const pos = randomPointInSphere();
         brain.neurons.push({
@@ -180,7 +180,7 @@ function generateBrainRandom(count, dendMin, dendMax, connMin, connMax, wMin, wM
     }
 
     if (connMode === "random") {
-        // LOSOWE POŁĄCZENIA
+        // RANDOM CONNECTIONS
         for (let i = 0; i < count; i++) {
             const n = brain.neurons[i];
             const connCount = randInt(connMin, connMax);
@@ -192,7 +192,7 @@ function generateBrainRandom(count, dendMin, dendMax, connMin, connMax, wMin, wM
             }
         }
     } else {
-        // POŁĄCZENIA DO NAJBLIŻSZYCH
+        // CONNECTIONS TO NEAREST NEIGHBORS
         for (let i = 0; i < count; i++) {
             const n = brain.neurons[i];
             const connCount = randInt(connMin, connMax);

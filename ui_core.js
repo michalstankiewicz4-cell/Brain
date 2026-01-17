@@ -35,7 +35,7 @@ function initUI() {
         saveUIState();
     };
 
-    // przyciski miniatur
+    // przyciski edytora
     document.getElementById("btn-save").onclick = () => {
         const img = getPixelImage();
         saveMemory(img);
@@ -51,6 +51,13 @@ function initUI() {
     };
 
     document.getElementById("btn-clear").onclick = () => {
+        // Wyczyść canvas edytora
+        pixelCtx.fillStyle = "rgb(0,0,0)";
+        pixelCtx.fillRect(0, 0, 64, 64);
+    };
+
+    // przycisk delete w sekcji miniatur
+    document.getElementById("btn-delete").onclick = () => {
         if (selectedMemoryIndex !== null) {
             deleteMemory(selectedMemoryIndex);
             selectedMemoryIndex = null;

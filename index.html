@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mózg 3D – Pamięć Obrazów</title>
+    <title>Brain 3D – Image Memory</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- PANEL BOCZNY (LEWA STRONA) -->
+<!-- SIDE PANEL (LEFT SIDE) -->
 <div id="right-panel">
 
-    <!-- SEKCJA 1 — EDYTOR -->
+    <!-- SECTION 1 — EDITOR -->
     <div class="section draggable" data-section="editor">
         <div class="section-header">
             <div class="drag-handle">⋮⋮</div>
-            <h3 class="collapsible-toggle">Edytor 16×16</h3>
+            <h3 class="collapsible-toggle">Editor 16×16</h3>
         </div>
 
         <div class="section-content">
@@ -32,164 +32,167 @@
             </div>
 
             <div id="controls">
-                <button id="btn-save">ZAPAMIĘTAJ</button>
-                <button id="btn-recall">ODTWÓRZ</button>
-                <button id="btn-clear">WYCZYŚĆ</button>
+                <button id="btn-save">SAVE</button>
+                <button id="btn-recall">LOAD</button>
+                <button id="btn-clear">CLEAR</button>
             </div>
 
         </div>
     </div>
 
-    <!-- SEKCJA 2 — GENERATOR MÓZGU -->
+    <!-- SECTION 2 — BRAIN GENERATOR -->
     <div class="section draggable" data-section="brain-generator">
         <div class="section-header">
             <div class="drag-handle">⋮⋮</div>
-            <h3 class="collapsible-toggle">Generator mózgu</h3>
+            <h3 class="collapsible-toggle">Brain Generator</h3>
         </div>
 
         <div class="section-content">
 
             <div class="form-row">
-                <label>Liczba neuronów:</label>
+                <label>Number of neurons:</label>
                 <input id="brain-count" type="number" min="10" max="1000" value="256">
             </div>
 
             <div class="form-row">
-                <label>Tryb generowania:</label>
+                <label>Generation mode:</label>
                 <select id="brain-mode">
-                    <option value="fixed">Stałe wartości</option>
-                    <option value="random">Losowe zakresy</option>
+                    <option value="fixed">Fixed values</option>
+                    <option value="random">Random ranges</option>
                 </select>
             </div>
 
             <div class="form-row">
-                <label>Tryb połączeń:</label>
+                <label>Connection mode:</label>
                 <select id="brain-connection-mode">
-                    <option value="random">Losowe</option>
-                    <option value="nearest">Najbliższe</option>
+                    <option value="random">Random</option>
+                    <option value="nearest">Nearest</option>
                 </select>
             </div>
 
-            <!-- TRYB STAŁY -->
+            <!-- FIXED MODE -->
             <div id="fixed-params">
 
                 <div class="form-row">
-                    <label>Dendryty na neuron:</label>
+                    <label>Dendrites per neuron:</label>
                     <input id="brain-dendrites" type="number" min="1" max="10" value="3">
                 </div>
 
                 <div class="form-row">
-                    <label>Połączenia na neuron:</label>
+                    <label>Connections per neuron:</label>
                     <input id="brain-connections" type="number" min="1" max="20" value="5">
                 </div>
 
                 <div class="form-row">
-                    <label>Moc połączeń:</label>
+                    <label>Connection weight:</label>
                     <input id="brain-weight" type="number" min="0.1" max="1" step="0.1" value="0.5">
                 </div>
 
             </div>
 
-            <!-- TRYB LOSOWY -->
+            <!-- RANDOM MODE -->
             <div id="random-params" style="display:none;">
 
                 <div class="form-row">
-                    <label>Dendryty:</label>
-                    <span>od</span>
+                    <label>Dendrites:</label>
+                    <span>from</span>
                     <input id="dend-min" type="number" min="1" max="10" value="2">
-                    <span>do</span>
+                    <span>to</span>
                     <input id="dend-max" type="number" min="1" max="10" value="6">
                 </div>
 
                 <div class="form-row">
-                    <label>Połączenia:</label>
-                    <span>od</span>
+                    <label>Connections:</label>
+                    <span>from</span>
                     <input id="conn-min" type="number" min="1" max="20" value="3">
-                    <span>do</span>
+                    <span>to</span>
                     <input id="conn-max" type="number" min="1" max="20" value="12">
                 </div>
 
                 <div class="form-row">
-                    <label>Moc:</label>
-                    <span>od</span>
+                    <label>Weight:</label>
+                    <span>from</span>
                     <input id="weight-min" type="number" min="0.1" max="1" step="0.1" value="0.2">
-                    <span>do</span>
+                    <span>to</span>
                     <input id="weight-max" type="number" min="0.1" max="1" step="0.1" value="0.8">
                 </div>
 
             </div>
 
             <div class="button-row">
-                <button id="btn-generate-brain">GENERUJ MÓZG</button>
+                <button id="btn-generate-brain">GENERATE BRAIN</button>
             </div>
 
         </div>
     </div>
 
-    <!-- SEKCJA 3 — PAMIĘĆ MÓZGU -->
+    <!-- SECTION 3 — BRAIN MEMORY -->
     <div class="section draggable" data-section="brain-memory">
         <div class="section-header">
             <div class="drag-handle">⋮⋮</div>
-            <h3 class="collapsible-toggle">Pamięć mózgu</h3>
+            <h3 class="collapsible-toggle">Brain Memory</h3>
         </div>
 
         <div class="section-content">
 
             <div class="form-row">
-                <label>Metoda zapisu:</label>
+                <label>Save method:</label>
                 <select id="save-method">
-                    <option value="direct">Bezpośredni zapis</option>
+                    <option value="direct">Direct write</option>
                     <option value="hebb">Hebb</option>
                     <option value="hopfield">Hopfield</option>
                 </select>
             </div>
 
             <div class="form-row">
-                <label>Metoda odczytu:</label>
+                <label>Load method:</label>
                 <select id="load-method">
-                    <option value="direct">Bezpośredni odczyt</option>
+                    <option value="direct">Direct read</option>
                     <option value="hebb">Hebb</option>
                     <option value="hopfield">Hopfield</option>
                 </select>
             </div>
 
             <div class="button-row">
-                <button id="btn-brain-save">ZAPISZ DO MÓZGU</button>
-                <button id="btn-brain-load">ODTWÓRZ Z MÓZGU</button>
+                <button id="btn-brain-save">SAVE TO BRAIN</button>
+                <button id="btn-brain-load">LOAD FROM BRAIN</button>
             </div>
 
         </div>
     </div>
 
-    <!-- SEKCJA 4 — MINIATURY -->
+    <!-- SECTION 4 — THUMBNAILS -->
     <div class="section draggable" data-section="thumbnails">
         <div class="section-header">
             <div class="drag-handle">⋮⋮</div>
-            <h3 class="collapsible-toggle">Pamięć miniatur</h3>
+            <h3 class="collapsible-toggle">Thumbnail Memory</h3>
         </div>
 
         <div class="section-content">
             <div id="memory-list"></div>
+            <div class="button-row">
+                <button id="btn-delete">DELETE</button>
+            </div>
         </div>
     </div>
 
 </div>
 
-<!-- UCHWYT DO ROZSZERZANIA PANELU -->
+<!-- PANEL RESIZER HANDLE -->
 <div id="panel-resizer"></div>
 
-<!-- MÓZG 3D -->
+<!-- BRAIN 3D -->
 <div id="brain-container">
     <canvas id="brain-canvas"></canvas>
 </div>
 
-<!-- SKRYPTY PROJEKTU -->
+<!-- PROJECT SCRIPTS -->
 <script src="brain3d.js"></script>
 <script src="brain_render.js"></script>
 <script src="brain_memory.js"></script>
 <script src="pixel_editor.js"></script>
 
-<!-- NOWE 3 PLIKI UI -->
+<!-- NEW 3 UI FILES -->
 <script src="ui_core.js"></script>
 <script src="ui_panel.js"></script>
 <script src="ui_state.js"></script>

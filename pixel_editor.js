@@ -1,5 +1,6 @@
 let pixelCanvas = null;
 let pixelCtx = null;
+let currentColor = "#ffffff"; // domyślny biały kolor
 
 function initPixelEditor() {
     pixelCanvas = document.getElementById("pixel-editor");
@@ -14,6 +15,22 @@ function initPixelEditor() {
     pixelCanvas.addEventListener("mousemove", (e) => {
         if (e.buttons === 1) paintPixel(e);
     });
+
+    // Event listenery dla palety kolorów
+    const swatches = document.querySelectorAll('.color-swatch');
+    swatches.forEach(swatch => {
+        swatch.addEventListener('click', () => {
+            currentColor = swatch.dataset.col;
+            // Wizualne zaznaczenie wybranego koloru
+            swatches.forEach(s => s.classList.remove('selected'));
+            swatch.classList.add('selected');
+        });
+    });
+
+    // Zaznacz pierwszy kolor jako domyślny
+    if (swatches.length > 0) {
+        swatches[swatches.length - 1].classList.add('selected'); // biały
+    }
 }
 
 function paintPixel(e) {
@@ -58,8 +75,11 @@ function getPixelImage() {
 // ---------------------------------------------
 
 function setPixelImage(img) {
-    pixelCtx.clearRect(0, 0, 64, 64);
+    // Najpierw wyczyść cały canvas na czarno
+    pixelCtx.fillStyle = "rgb(0,0,0)";
+    pixelCtx.fillRect(0, 0, 64, 64);
 
+    // Następnie narysuj tylko niezerowe piksele
     for (let i = 0; i < 256; i++) {
         const col = img[i];
         if (col !== "rgb(0,0,0)") {

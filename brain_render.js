@@ -10,7 +10,7 @@ function renderBrain(ctx, state) {
         ctx.fillStyle = "#444";
         ctx.font = "16px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("Brak mózgu – użyj GENERUJ MÓZG", w / 2, h / 2);
+        ctx.fillText("No brain – use GENERATE BRAIN", w / 2, h / 2);
         return;
     }
 
@@ -50,7 +50,7 @@ function renderBrain(ctx, state) {
         projById[p.id] = p;
     });
 
-    // połączenia
+    // connections
     ctx.lineWidth = 1;
     ctx.save();
     ctx.globalAlpha = 0.4;
@@ -74,7 +74,7 @@ function renderBrain(ctx, state) {
 
     ctx.restore();
 
-    // neurony
+    // neurons
     projected.forEach(p => {
         const baseSize = 3;
         const size = baseSize + (1 - p.depth) * 3;
