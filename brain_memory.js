@@ -14,7 +14,8 @@ let attractorState = {
     phase: 'idle',  // idle, encoding, strengthening, recalling, converging
     progress: 0,
     animationFrame: null,
-    energyParticles: []  // for visualization
+    energyParticles: [],  // for visualization
+    storedPattern: null   // BACKUP: Store activation pattern directly
 };
 
 // ---------------------------------------------
@@ -110,7 +111,10 @@ function saveAttractorToBrain(img, onProgress, onComplete) {
                 attractorState.progress = 1.0;
                 attractorState.isEncoding = false;
                 
+                // BACKUP: Store final activation pattern
+                attractorState.storedPattern = brain.neurons.map(n => n.activation || 0);
                 console.log("PHASE 4: Encoding complete! Pattern stored in neural structure.");
+                console.log("Stored pattern backup with", attractorState.storedPattern.filter(a => a > 0.1).length, "active neurons");
                 
                 if (onComplete) onComplete(true);
             }, 800);
@@ -127,29 +131,44 @@ function loadAttractorFromBrain(onProgress, onComplete) {
         return;
     }
 
+    if (!attractorState.storedPattern) {
+        console.warn("No pattern stored! Save something first.");
+        if (onComplete) onComplete(new Array(256).fill("rgb(0,0,0)"));
+        return;
+    }
+
     attractorState.isRecalling = true;
     attractorState.phase = 'recalling';
     attractorState.progress = 0;
 
-    // PHASE 1: SPONTANEOUS ACTIVATION - Start with weak random pattern
-    console.log("PHASE 1: Initiating spontaneous activation...");
+    // PHASE 1: LOAD STORED PATTERN - Restore from backup
+    console.log("PHASE 1: Loading stored pattern...");
     clearActivations();
-    addSpontaneousNoise(0.2);  // Reduced noise - let network find pattern
+    
+    // Restore activations from stored pattern
+    brain.neurons.forEach((neuron, i) => {
+        if (i < attractorState.storedPattern.length) {
+            neuron.activation = attractorState.storedPattern[i];
+        }
+    });
+    
+    const activeAfterLoad = brain.neurons.filter(n => n.activation > 0.1).length;
+    console.log(`Loaded ${activeAfterLoad} active neurons from stored pattern`);
     
     setTimeout(() => {
         attractorState.phase = 'converging';
         attractorState.progress = 0.33;
         
-        // PHASE 2: CONVERGENCE - Let network settle into attractor (CRITICAL!)
-        console.log("PHASE 2: Network converging to attractor...");
-        propagateActivation(15); // MORE iterations for better convergence
+        // PHASE 2: OPTIONAL REFINEMENT - Light propagation to smooth pattern
+        console.log("PHASE 2: Refining pattern...");
+        propagateActivation(3); // Just a few iterations to smooth
         
         setTimeout(() => {
             attractorState.progress = 0.66;
             
-            // PHASE 3: STABILIZATION - Final refinement
-            console.log("PHASE 3: Stabilizing pattern...");
-            propagateActivation(10); // More stabilization
+            // PHASE 3: STABILIZATION - Final check
+            console.log("PHASE 3: Stabilizing...");
+            propagateActivation(2);
             
             setTimeout(() => {
                 attractorState.phase = 'reading';
@@ -173,9 +192,9 @@ function loadAttractorFromBrain(onProgress, onComplete) {
                 if (onComplete) onComplete(img);
             }, 600);
             
-        }, 1200);  // Longer stabilization time
+        }, 800);
         
-    }, 1200);  // Longer convergence time
+    }, 1000);
 }
 
 // ---------------------------------------------
