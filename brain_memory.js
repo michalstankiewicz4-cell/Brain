@@ -241,6 +241,31 @@ function propagateActivation(iterations) {
     }
 }
 
+function propagateWithDecay(iterations, decay) {
+    for (let iter = 0; iter < iterations; iter++) {
+        const newActivations = new Array(brain.neurons.length).fill(0);
+        
+        brain.neurons.forEach((neuron, i) => {
+            let input = neuron.activation * decay; // Self-decay
+            
+            // Receive input from connected neurons
+            neuron.connections.forEach(conn => {
+                const sourceActivation = brain.neurons[conn.target].activation || 0;
+                input += sourceActivation * conn.weight * 0.3; // Reduced influence
+            });
+            
+            // Apply sigmoid with threshold
+            const activated = sigmoid(input);
+            newActivations[i] = activated > 0.3 ? activated : 0; // Threshold!
+        });
+        
+        // Update activations
+        brain.neurons.forEach((neuron, i) => {
+            neuron.activation = newActivations[i];
+        });
+    }
+}
+
 function addSpontaneousNoise(strength) {
     brain.neurons.forEach(neuron => {
         // Add small random activation to break symmetry
@@ -328,23 +353,23 @@ function loadPureAttractorFromBrain(onProgress, onComplete) {
         attractorState.phase = 'converging';
         attractorState.progress = 0.2;
         
-        // PHASE 2: HEAVY CONVERGENCE - Let network find attractor
-        console.log("PURE ATTRACTOR - PHASE 2: Converging to attractor (25 iterations)...");
-        propagateActivation(25); // Many iterations!
+        // PHASE 2: HEAVY CONVERGENCE - Let network find attractor with decay
+        console.log("PURE ATTRACTOR - PHASE 2: Converging to attractor (20 iterations with decay)...");
+        propagateWithDecay(20, 0.9); // Decay to prevent runaway activation
         
         setTimeout(() => {
             attractorState.progress = 0.5;
             
             // PHASE 3: DEEP STABILIZATION - Lock into pattern
-            console.log("PURE ATTRACTOR - PHASE 3: Deep stabilization (25 iterations)...");
-            propagateActivation(25);
+            console.log("PURE ATTRACTOR - PHASE 3: Deep stabilization (15 iterations with decay)...");
+            propagateWithDecay(15, 0.95); // Less decay for stabilization
             
             setTimeout(() => {
                 attractorState.progress = 0.8;
                 
                 // PHASE 4: FINAL REFINEMENT
-                console.log("PURE ATTRACTOR - PHASE 4: Final refinement (15 iterations)...");
-                propagateActivation(15);
+                console.log("PURE ATTRACTOR - PHASE 4: Final refinement (10 iterations)...");
+                propagateWithDecay(10, 0.98); // Very light decay
                 
                 setTimeout(() => {
                     attractorState.phase = 'reading';
@@ -368,11 +393,11 @@ function loadPureAttractorFromBrain(onProgress, onComplete) {
                     if (onComplete) onComplete(img);
                 }, 1000);
                 
-            }, 2000);
+            }, 1500);
             
-        }, 2000);
+        }, 1500);
         
-    }, 1500);
+    }, 1200);
 }
 
 // Strong Hebbian learning with configurable rate
